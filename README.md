@@ -5,4 +5,5 @@ Example force directed graph that lets you cleanly add nodes and edges as you go
 
 [Run it by clicking here](http://rawgit.com/adrianco/d3grow/master/d3grow.html)
 
-
+After clicking on "More" a bunch of times it will look like this:
+![screenshot](https://github.com/adrianco/d3grow/raw/master/d3grow-screenshot.png)
