@@ -53,18 +53,41 @@
 					 .attr("cy", function(d) { return d.y; });
 			});
 
+			//This will be needed later when edges refer to nodes by name
+			var findnode = function(nodename) {
+				for (n = 0; n < dataset.nodes.length; n++)
+					if (dataset.nodes[n][0] == nodename)
+						break;
+				return n;
+			}
+
+
+			var removenode = function(d, i) {
+				// TODO - not sure how to remove objects
+				// remove edges first
+				// then node
+				// then rebuild force
+			}
+
 			// add a node and some edges
 			var addnode = function() {
 					// console.log("More...");
 					dataset.nodes.push(["node" + nodecount]);
+					dataset.nodes[nodecount].size = 0;
 					// connect to one or two random nodes
 					var t = Math.floor(Math.random() * nodecount);
-                                	if ( t != nodecount) // don't connect to self
+                                	if ( t != nodecount) {  // don't connect to self
 						dataset.edges.push({ source: nodecount, target: t });
-						var t2 = Math.floor(Math.random() * nodecount);
-						// if first random node was odd, add another one
-						if ( t % 2 && t2 != nodecount)
+						dataset.nodes[nodecount].size++;
+						dataset.nodes[t].size++;
+						var t2 = 0; //Math.floor(Math.random() * nodecount);
+						// if first random node was odd, add another one linked to first node
+						if ( t % 2 && t2 != nodecount) {
                                                 	dataset.edges.push({ source: nodecount, target: t2 });
+                                                	dataset.nodes[nodecount].size++;
+                                                	dataset.nodes[t2].size++;
+						}
+					}
 					nodecount++;
                         		svg.selectAll("line")
                                 		.data(dataset.edges)
@@ -72,16 +95,32 @@
                                 		.append("line")
                                 		.style("stroke", "#ccc")
                                 		.style("stroke-width", 2);
+
 					svg.selectAll("circle")
                                 		.data(dataset.nodes)
                                 		.enter()
                               	 		.append("circle")
-                                		.attr("r", 5)
                                 		.style("fill", function(d, i) {
                                 	       		return colors(i);
                                 		})
+						.on("click", function(d, i) {
+							// for now just change the color
+							d3.select(this).style("fill", colors(0));
+							// delete this one and its links
+							removenode(d, i);
+						});
+
+					svg.selectAll("circle")
+						.data(dataset.nodes)
+						.attr("r", function(d) {
+                                                        return Math.sqrt(d.size) * 2;
+                                                })
                                 		.call(force.drag);
-					force.start();
+
+					force.linkDistance(function(d) {
+							return 10 + 4 * (d.source.size + d.target.size);
+						})
+						.start();
 				};
 
 			for (i = 0; i < 20; i++)
